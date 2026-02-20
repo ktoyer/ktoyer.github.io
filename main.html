@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kevin Toyer</title>
+<style>
+  :root[data-theme="light"] {
+    --bg: #C8CACD;
+    --bg2: #C0C2C5; --bg3: #B8BABE;
+    --text: #111111; --text-sub: #3a3a3a; --text-muted: #666666;
+    --accent: #FF6600;
+    --divider: rgba(0,0,0,0.13);
+    --nav-bg: #C8CACD;
+    --btn-bg: #111111; --btn-text: #ffffff;
+    --card-bg: #C0C2C5; --grid: rgba(0,0,0,0.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #2e2e2c;
+    --bg2: #363634; --bg3: #3e3e3c;
+    --text: #f0ede6; --text-sub: #a09e98; --text-muted: #6a6a64;
+    --accent: #e8c547;
+    --divider: rgba(255,255,255,0.07);
+    --nav-bg: #2e2e2c;
+    --btn-bg: #e8c547; --btn-text: #1a1a18;
+    --card-bg: #363634; --grid: rgba(255,255,255,0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text-sub); font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6; transition: background 0.3s, color 0.3s; }
+  a { color: inherit; text-decoration: none; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 120px 120px;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: var(--nav-bg);
+    padding: 0 2.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    height: 60px;
+    transition: background 0.3s;
+  }
+  .logo { font-size: 0.78rem; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); cursor: pointer; }
+  .nav-center { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-center a { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
+  .nav-center a:hover { color: var(--text); }
+  .nav-center a.active-link { color: var(--text); border-bottom: 1px solid var(--accent); padding-bottom: 2px; }
+  .nav-right { display: flex; align-items: center; gap: 1rem; }
+  .theme-btn { display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--divider); padding: 0.4rem 1rem; font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); cursor: pointer; background: transparent; transition: all 0.2s; white-space: nowrap; }
+  .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* HAMBURGER */
+  .hamburger { display: none; flex-direction: column; justify-content: center; align-items: center; gap: 5px; width: 44px; height: 44px; cursor: pointer; background: transparent; border: none; padding: 0; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.25s ease; }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* MOBILE MENU DRAWER */
+  .mobile-menu {
+    display: none;
+    position: fixed; top: 60px; left: 0; right: 0; z-index: 99;
+    background: var(--nav-bg);
+    border-top: 1px solid var(--divider);
+    padding: 1.5rem 1.5rem 2rem;
+    flex-direction: column; gap: 0;
+    transform: translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+  .mobile-menu.open {
+    display: flex;
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .mobile-menu li { list-style: none; border-bottom: 1px solid var(--divider); }
+  .mobile-menu li:first-child { border-top: 1px solid var(--divider); }
+  .mobile-menu a {
+    display: block; padding: 1rem 0;
+    font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); cursor: pointer; transition: color 0.2s;
+  }
+  .mobile-menu a:hover, .mobile-menu a.active-link { color: var(--accent); }
+
+  /* BUTTONS */
+  .btn-primary { display: inline-flex; align-items: center; background: var(--btn-bg); color: var(--btn-text); font-size: 0.7rem; letter-spacing: 2.5px; text-transform: uppercase; padding: 1rem 2rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .btn-primary:hover { opacity: 0.8; }
+
+  /* HERO */
+  #hero { position: relative; display: flex; flex-direction: column; justify-content: center; padding: 100px 2.5rem 0; overflow: hidden; }
+  .hero-tags { display: flex; align-items: center; margin-bottom: 2.5rem; position: relative; z-index: 1; flex-wrap: wrap; gap: 0.4rem; }
+  .hero-tag { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); }
+  .hero-dot { margin: 0 0.75rem; color: var(--text-muted); font-size: 0.6rem; }
+  .hero-headline { position: relative; z-index: 1; margin-bottom: 2.5rem; }
+  .hero-headline h1 { font-size: clamp(5rem, 14vw, 13rem); font-weight: 900; line-height: 0.9; letter-spacing: -3px; color: var(--text); }
+  .hero-headline h1 .accent { color: var(--accent); display: block; }
+  .hero-bottom { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: end; gap: 3rem; padding-bottom: 1rem; }
+  .hero-desc { font-size: 1rem; line-height: 1.75; color: var(--text-sub); max-width: 420px; }
+  .vert-text { position: absolute; right: 18rem; top: 65%; writing-mode: vertical-rl; font-size: 0.6rem; letter-spacing: 4px; text-transform: uppercase; color: #aaaaaa; transform: translateY(-50%); z-index: 1; white-space: nowrap; }
+
+  /* PAGE WRAP */
+  .page-wrap { max-width: 1100px; margin: 0 auto; padding: 3rem 2.5rem 6rem; position: relative; z-index: 1; }
+  .sec-eyebrow { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem; }
+  .sec-heading { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: var(--text); letter-spacing: -1px; margin-bottom: 3rem; line-height: 1; }
+
+  /* ABOUT */
+  .about-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; }
+  .about-layout p { font-size: 1rem; line-height: 1.8; margin-bottom: 1.25rem; color: var(--text-sub); }
+
+  /* CONTACT */
+  .contact-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+  .contact-intro h2 { font-size: clamp(2rem,4vw,3rem); font-weight: 900; color: var(--text); letter-spacing: -1px; line-height: 1.1; margin-bottom: 1.5rem; }
+  .contact-intro p { color: var(--text-sub); font-size: 1rem; line-height: 1.75; }
+  .form-field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-field label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+  .form-field input, .form-field textarea { background: transparent; border: none; border-bottom: 1px solid var(--divider); padding: 0.75rem 0; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.95rem; color: var(--text); outline: none; resize: none; transition: border-color 0.2s; -webkit-appearance: none; border-radius: 0; }
+  .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); }
+  .form-field input::placeholder, .form-field textarea::placeholder { color: var(--text-muted); }
+
+  /* EXPERTISE PAGE */
+  .exp-page-hero { padding: 120px 2.5rem 80px; position: relative; z-index: 1; border-bottom: 1px solid var(--divider); }
+  .exp-page-hero .eyebrow { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+  .exp-page-hero h1 { font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; color: var(--text); letter-spacing: -2px; line-height: 0.95; margin-bottom: 1.5rem; }
+  .exp-page-hero p { font-size: 1rem; color: var(--text-sub); max-width: 500px; line-height: 1.75; }
+  .core-section { position: relative; z-index: 1; padding: 5rem 2.5rem; border-bottom: 1px solid var(--divider); }
+  .core-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--divider); }
+  .core-header .eyebrow { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); }
+  .core-header h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; color: var(--text); letter-spacing: -0.5px; font-style: italic; }
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .skill-cell { padding: 2.5rem; border: 1px solid var(--divider); margin: -1px 0 0 -1px; }
+  .skill-num { font-size: 0.7rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 1rem; }
+  .skill-name { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 0.75rem; }
+  .skill-desc { font-size: 0.88rem; color: var(--text-sub); line-height: 1.7; }
+  .exp-section { position: relative; z-index: 1; padding: 5rem 2.5rem; border-bottom: 1px solid var(--divider); }
+  .exp-section-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--divider); }
+  .exp-section-header .eyebrow { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); }
+  .exp-section-header h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; color: var(--text); letter-spacing: -0.5px; font-style: italic; }
+  .exp-row { display: grid; grid-template-columns: 160px 1fr; gap: 3rem; padding: 2.5rem 0; border-bottom: 1px solid var(--divider); }
+  .exp-date { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.5px; line-height: 1.6; padding-top: 0.2rem; }
+  .exp-role { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-bottom: 0.1rem; }
+  .exp-company { font-size: 0.82rem; color: var(--accent); font-weight: 700; margin-bottom: 1rem; }
+  /* Grouped company entry */
+  .exp-company-group { display: grid; grid-template-columns: 160px 1fr; gap: 3rem; padding: 2.5rem 0; border-bottom: 1px solid var(--divider); }
+  .exp-company-meta { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.5px; line-height: 1.6; padding-top: 0.2rem; }
+  .exp-company-name { font-size: 0.82rem; color: var(--accent); font-weight: 700; margin-bottom: 1.5rem; }
+  .exp-sub-role { padding: 1rem 0; border-top: 1px solid var(--divider); }
+  .exp-sub-role:first-of-type { border-top: none; padding-top: 0; }
+  .exp-sub-title { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 0.15rem; }
+  .exp-sub-date { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 0.75rem; }
+  .exp-desc { font-size: 0.92rem; color: var(--text-sub); line-height: 1.75; }
+  .exp-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
+  .exp-tag { font-size: 0.62rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); border: 1px solid var(--divider); padding: 0.2rem 0.6rem; }
+  .rec-block { padding: 2.5rem 0; border-bottom: 1px solid var(--divider); }
+  .rec-quote { font-size: 1rem; font-style: italic; color: var(--text-sub); line-height: 1.8; margin-bottom: 1.25rem; }
+  .rec-name { font-size: 0.85rem; font-weight: 800; color: var(--text); }
+  .rec-role-text { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+  .edu-row { display: grid; grid-template-columns: 160px 1fr; gap: 3rem; padding: 2.5rem 0; border-bottom: 1px solid var(--divider); }
+  .honor { display: inline-block; font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 0.2rem 0.6rem; margin-top: 0.75rem; margin-right: 0.4rem; }
+  .cert-row { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 0; border-top: 1px solid var(--divider); }
+  .cert-row:last-child { border-bottom: 1px solid var(--divider); }
+  .cert-name { font-size: 0.92rem; font-weight: 700; color: var(--text); }
+  .cert-issuer { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
+  .cert-badge { font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 0.2rem 0.6rem; flex-shrink: 0; margin-left: 1rem; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); cursor: pointer; margin-bottom: 4rem; transition: color 0.2s; padding: 0.5rem 0; }
+  .back-link:hover { color: var(--accent); }
+
+  /* BLOG */
+  .blog-page-wrap { max-width: 1100px; margin: 0 auto; padding: 8rem 2.5rem 6rem; position: relative; z-index: 1; }
+  .post-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .post-card { padding: 2.5rem; border: 1px solid var(--divider); margin: -1px 0 0 -1px; cursor: pointer; transition: background 0.2s; }
+  .post-card:hover { background: var(--bg2); }
+  .post-card-tag { font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+  .post-card-title { font-size: 1.1rem; font-weight: 800; color: var(--text); line-height: 1.3; margin-bottom: 0.75rem; }
+  .post-card-excerpt { font-size: 0.87rem; color: var(--text-sub); line-height: 1.7; margin-bottom: 1.25rem; }
+  .post-card-meta { font-size: 0.68rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+  .post-card-arrow { color: var(--accent); font-size: 1rem; }
+
+  /* POST */
+  .post-page-wrap { max-width: 680px; margin: 0 auto; padding: 8rem 2.5rem 6rem; position: relative; z-index: 1; }
+  .post-header { margin-bottom: 3rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--divider); }
+  .post-header-tag { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
+  .post-header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; color: var(--text); line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 1rem; }
+  .post-header-meta { font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+  .post-body { font-size: 1.05rem; line-height: 1.85; color: var(--text-sub); }
+  .post-body h2 { font-size: 1.25rem; font-weight: 800; color: var(--text); margin: 2.5rem 0 1rem; }
+  .post-body p { margin-bottom: 1.4rem; }
+  .post-body blockquote { border-left: 3px solid var(--accent); padding-left: 1.5rem; margin: 2rem 0; font-style: italic; }
+
+  footer { position: relative; z-index: 1; padding: 2rem 2.5rem; border-top: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: center; font-size: 0.68rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+
+  /* =====================
+     MOBILE STYLES
+     ===================== */
+  @media (max-width: 768px) {
+    /* NAV */
+    nav { padding: 0 1.25rem; }
+    .nav-center { display: none; }
+    .theme-btn span:last-child { display: none; }
+    .theme-btn { padding: 0.4rem 0.75rem; border-radius: 0; }
+    .hamburger { display: flex; }
+
+    /* HERO */
+    #hero { padding: 80px 1.25rem 0; }
+    .hero-tags { gap: 0.25rem; }
+    .hero-dot { margin: 0 0.4rem; }
+    .hero-headline h1 { font-size: clamp(3.5rem, 17vw, 6.5rem); letter-spacing: -2px; }
+    .hero-bottom { grid-template-columns: 1fr; gap: 0; padding-bottom: 2.5rem; }
+    .hero-desc { font-size: 0.95rem; max-width: 100%; }
+    .vert-text { display: none; }
+
+    /* PAGE WRAP */
+    .page-wrap { padding: 2.5rem 1.25rem 5rem; }
+    .sec-heading { font-size: clamp(1.75rem, 7vw, 2.5rem); margin-bottom: 2rem; }
+
+    /* ABOUT */
+    .about-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+
+    /* CONTACT */
+    .contact-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+    .contact-name-email { grid-template-columns: 1fr !important; }
+    .btn-primary { width: 100%; justify-content: center; padding: 1.1rem 1rem; }
+
+    /* EXPERTISE */
+    .exp-page-hero { padding: 90px 1.25rem 3rem; }
+    .core-section, .exp-section { padding: 3rem 1.25rem; }
+    .core-header, .exp-section-header { flex-direction: column; gap: 0.5rem; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .skill-cell { padding: 1.5rem 1rem; }
+    .exp-row, .edu-row { grid-template-columns: 1fr; gap: 0.25rem; padding: 1.75rem 0; }
+    .exp-company-group { grid-template-columns: 1fr; gap: 0.25rem; padding: 1.75rem 0; }
+    .exp-company-meta { padding-bottom: 0.25rem; }
+    .exp-date { padding-top: 0; padding-bottom: 0.5rem; }
+    .exp-tags { gap: 0.35rem; }
+
+    /* BLOG */
+    .blog-page-wrap { padding: 5.5rem 1.25rem 4rem; }
+    .post-grid { grid-template-columns: 1fr; }
+    .post-card { padding: 1.5rem 1.25rem; margin: 0; border-left: none; border-right: none; border-top: none; border-bottom: 1px solid var(--divider); }
+    .post-card:first-child { border-top: 1px solid var(--divider); }
+    /* Override the wide featured card */
+    .post-card[style*="grid-column"] { grid-column: span 1 !important; }
+    .post-card[style*="grid-column"] > div { display: block !important; grid-template-columns: unset !important; }
+    .post-card-title { font-size: 1rem; }
+
+    /* POST */
+    .post-page-wrap { padding: 5.5rem 1.25rem 4rem; }
+    .post-body { font-size: 1rem; }
+
+    /* FOOTER */
+    footer { flex-direction: column; gap: 0.75rem; text-align: center; padding: 1.75rem 1.25rem; }
+  }
+
+  @media (max-width: 400px) {
+    .hero-headline h1 { font-size: clamp(3rem, 20vw, 4.5rem); }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<nav>
+  <div class="logo" onclick="showPage('home'); closeMenu()">Kevin Toyer</div>
+  <ul class="nav-center">
+    <li><a onclick="showPage('home')" id="nav-home">Home</a></li>
+    <li><a onclick="showPage('blog')" id="nav-blog">Ideas & Insights</a></li>
+    <li><a onclick="showPage('experience')" id="nav-experience">Expertise</a></li>
+    <li><a onclick="showPage('home'); goTo('contact')" id="nav-contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span> <span id="theme-label">Light</span></div>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<ul class="mobile-menu" id="mobile-menu">
+  <li><a onclick="showPage('home'); closeMenu()" id="mob-home">Home</a></li>
+  <li><a onclick="showPage('blog'); closeMenu()" id="mob-blog">Ideas & Insights</a></li>
+  <li><a onclick="showPage('experience'); closeMenu()" id="mob-experience">Expertise</a></li>
+  <li><a onclick="showPage('home'); goTo('contact'); closeMenu()">Contact</a></li>
+</ul>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div id="hero">
+    <div class="hero-tags">
+      <span class="hero-tag">IT Leadership</span><span class="hero-dot">·</span>
+      <span class="hero-tag">Service Management</span><span class="hero-dot">·</span>
+      <span class="hero-tag">Cybersecurity</span>
+    </div>
+    <div class="hero-headline">
+      <h1>Support,<br><span class="accent">handled.</span></h1>
+    </div>
+    <div class="hero-bottom">
+      <p class="hero-desc">A decade of leading IT Service Desk operations in cybersecurity. I don't just manage tickets — I build teams that execute under pressure, hold the line on standards, and deliver every time.</p>
+      <div></div><div></div>
+    </div>
+    <div class="vert-text">Focus on the little things, big things will come</div>
+  </div>
+
+  <div class="page-wrap">
+    <section id="about">
+      <div class="sec-eyebrow">About</div>
+      <h2 class="sec-heading">Who I Am</h2>
+      <div class="about-layout">
+        <div>
+          <p>A decade of leading IT Service Desk operations in cybersecurity. I don't just manage tickets — I build teams that execute under pressure, hold the line on standards, and deliver every time.</p>
+          <p>I set clear expectations, create a culture of pride and ownership, and ensure every request is handled professionally and to completion.</p>
+        </div>
+      </div>
+    </section>
+
+    <div style="height:6rem"></div>
+
+    <section id="contact" style="padding-top:6rem">
+      <div class="contact-layout">
+        <div class="contact-intro">
+          <div class="sec-eyebrow">Contact</div>
+          <h2>Let's connect.</h2>
+          <p>Start the conversation.</p>
+        </div>
+        <form action="https://formspree.io/f/xqeddvqj" method="POST" style="display:flex;flex-direction:column;gap:1.5rem;">
+          <div class="contact-name-email" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+            <div class="form-field"><label>Name</label><input type="text" name="name" placeholder="Your name" required></div>
+            <div class="form-field"><label>Email</label><input type="email" name="email" placeholder="your@email.com" required></div>
+          </div>
+          <div class="form-field"><label>Subject</label><input type="text" name="subject" placeholder="What's this about?"></div>
+          <div class="form-field"><label>Message</label><textarea rows="5" name="message" placeholder="Your message..." required></textarea></div>
+          <div><button type="submit" class="btn-primary">Send Message</button></div>
+        </form>
+      </div>
+    </section>
+  </div>
+  <footer><span>Kevin Toyer</span><a href="https://www.linkedin.com/in/kevintoyer/" target="_blank" style="color:var(--text-muted)">linkedin.com/in/kevintoyer</a></footer>
+</div>
+
+<!-- EXPERTISE -->
+<div id="page-experience" class="page">
+  <div class="exp-page-hero">
+    <div class="eyebrow">Background & Credentials</div>
+    <h1>Expertise</h1>
+    <p>10+ years of hands-on IT service management, team leadership, and technical credibility. Here's what I bring to the table.</p>
+  </div>
+  <div class="core-section">
+    <div class="core-header">
+      <div class="eyebrow">Core Areas</div>
+      <h2>What I Know Well</h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-cell"><div class="skill-num">01</div><div class="skill-name">IT Service Management</div><div class="skill-desc">Running service desks that deliver consistently — from SLA design to incident response frameworks and team accountability.</div></div>
+      <div class="skill-cell"><div class="skill-num">02</div><div class="skill-name">Team Leadership</div><div class="skill-desc">Building cultures where people take ownership. Setting expectations clearly, giving real feedback, and developing talent.</div></div>
+      <div class="skill-cell"><div class="skill-num">03</div><div class="skill-name">Cybersecurity Awareness</div><div class="skill-desc">CompTIA Security+ certified. Understanding how security principles intersect with day-to-day IT support operations.</div></div>
+      <div class="skill-cell"><div class="skill-num">04</div><div class="skill-name">Process Improvement</div><div class="skill-desc">Finding where the friction is, eliminating waste, and building repeatable processes that don't fall apart under pressure.</div></div>
+    </div>
+  </div>
+  <div class="exp-section">
+    <div class="exp-section-header"><div class="eyebrow">Experience</div><h2>Where I've Worked</h2></div>
+    <div class="exp-company-group">
+      <div class="exp-company-meta">2015 – Present<br>La Jolla, CA</div>
+      <div>
+        <div class="exp-company-name">GoSecure</div>
+        <div class="exp-sub-role">
+          <div class="exp-sub-title">Support Desk Manager</div>
+          <div class="exp-sub-date">2022 – Present</div>
+          <div class="exp-desc">Lead IT Service Desk operations with a strong focus on world-class customer service, team leadership, and consistent execution. By setting clear expectations and driving accountability, tasks are completed accurately and on time.</div>
+          <div class="exp-tags"><span class="exp-tag">Team Leadership</span><span class="exp-tag">KPI Reporting</span><span class="exp-tag">SLA Management</span><span class="exp-tag">Cybersecurity</span><span class="exp-tag">Customer Service</span></div>
+        </div>
+        <div class="exp-sub-role">
+          <div class="exp-sub-title">Associate Systems Administrator</div>
+          <div class="exp-sub-date">2015 – 2022</div>
+          <div class="exp-desc">Supported day-to-day IT systems administration, maintaining infrastructure reliability and providing technical support across the organization.</div>
+          <div class="exp-tags"><span class="exp-tag">Systems Administration</span><span class="exp-tag">IT Support</span><span class="exp-tag">Infrastructure</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="exp-row">
+      <div class="exp-date">Jul – Dec 2014<br>San Diego, CA</div>
+      <div>
+        <div class="exp-role">IT Engineer</div>
+        <div class="exp-company">Qualcomm</div>
+        <div class="exp-desc">Contributed to IT engineering projects at one of the world's leading semiconductor companies, gaining hands-on experience in enterprise-level IT operations and infrastructure.</div>
+        <div class="exp-tags"><span class="exp-tag">IT Engineering</span><span class="exp-tag">Enterprise IT</span><span class="exp-tag">Infrastructure</span></div>
+      </div>
+    </div>
+    <div style="height:1rem"></div>
+    <div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);padding-bottom:1rem;border-bottom:1px solid var(--divider)">Recommendation</div>
+    <div class="rec-block">
+      <p class="rec-quote">"Kevin was my leader for over 3 years. He led the team and set realistic goals and gives clear instructions and feedback. He instills pride, confidence, and positive energy in everyone on his team. I would welcome the opportunity to work with him again. Good manager!"</p>
+      <div class="rec-name">Tai (Ray) Nguyen</div>
+      <div class="rec-role-text">DevOps, System & Network Engineer at LTCoders · October 2023</div>
+    </div>
+  </div>
+  <div class="exp-section">
+    <div class="exp-section-header"><div class="eyebrow">Education</div><h2>Where I Studied</h2></div>
+    <div class="edu-row">
+      <div class="exp-date">2012 – 2015<br>San Diego, CA</div>
+      <div>
+        <div class="exp-role">B.S. Business Management</div>
+        <div class="exp-company">San Diego Christian College</div>
+        <div class="exp-desc">Business Administration and Management, General.</div>
+        <span class="honor">🏆 Dean's List · Jan 2014 · 4.0</span>
+        <span class="honor">🏆 Dean's List · Jul 2014 · 4.0</span>
+      </div>
+    </div>
+    <div style="margin-top:2rem;font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);padding-bottom:1rem;border-bottom:1px solid var(--divider)">Certifications</div>
+    <div class="cert-row"><div><div class="cert-name">CompTIA Security+ CE</div><div class="cert-issuer">CompTIA · Issued Apr 2021</div></div><div class="cert-badge">Certified</div></div>
+    <div class="cert-row"><div><div class="cert-name">Certified ScrumMaster (CSM)</div><div class="cert-issuer">Scrum Alliance · ID: 1477315</div></div><div class="cert-badge">Certified</div></div>
+    <div style="margin-top:4rem"><span class="btn-primary" onclick="showPage('home')">← Back to Home</span></div>
+  </div>
+  <footer><span>Kevin Toyer</span><a href="https://www.linkedin.com/in/kevintoyer/" target="_blank" style="color:var(--text-muted)">linkedin.com/in/kevintoyer</a></footer>
+</div>
+
+<!-- BLOG -->
+<div id="page-blog" class="page">
+  <div class="blog-page-wrap">
+    <div class="back-link" onclick="showPage('home')">← Home</div>
+    <div class="sec-eyebrow">Service Management</div>
+    <h1 style="font-size:clamp(2rem,6vw,4rem);font-weight:900;letter-spacing:-1.5px;color:var(--text);margin-bottom:0.75rem;line-height:1">Ideas &<br>Insights</h1>
+    <p style="margin-bottom:3rem;font-size:1rem;color:var(--text-sub);max-width:480px">Thoughts on IT leadership, service desk operations, and building teams that last.</p>
+    <div class="post-grid">
+      <div class="post-card" onclick="showPost('post1')"><div class="post-card-tag">Leadership</div><div class="post-card-title">Why Accountability Is the Foundation of Every Great Support Team</div><div class="post-card-excerpt">Accountability isn't about blame — it's about ownership. The teams that consistently exceed SLAs share one trait above all else.</div><div class="post-card-meta"><span>Feb 2026</span><span class="post-card-arrow">→</span></div></div>
+      <div class="post-card" onclick="showPost('post2')"><div class="post-card-tag">Operations</div><div class="post-card-title">KPIs That Actually Matter in IT Service Desk Management</div><div class="post-card-excerpt">Not all metrics are created equal. Here's how to measure performance in a way that motivates teams and drives real service quality.</div><div class="post-card-meta"><span>Jan 2026</span><span class="post-card-arrow">→</span></div></div>
+      <div class="post-card" onclick="showPost('post3')"><div class="post-card-tag">Culture</div><div class="post-card-title">Building Pride in a Support Role: How to Make Your Team Love the Work</div><div class="post-card-excerpt">Support roles often get a bad reputation. Here's how I've worked to change that culture — and why it directly impacts satisfaction scores.</div><div class="post-card-meta"><span>Dec 2025</span><span class="post-card-arrow">→</span></div></div>
+      <div class="post-card" onclick="showPost('post4')"><div class="post-card-tag">Process</div><div class="post-card-title">SLA Management Without the Stress: A Practical Framework</div><div class="post-card-excerpt">Service-level agreements should be a floor, not a ceiling. Here's the framework I use to keep my team consistently ahead.</div><div class="post-card-meta"><span>Nov 2025</span><span class="post-card-arrow">→</span></div></div>
+      <div class="post-card" onclick="showPost('post5')" style="grid-column:span 2"><div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start"><div><div class="post-card-tag">Security</div><div class="post-card-title">What CompTIA Security+ Taught Me About Running a Better Help Desk</div></div><div><div class="post-card-excerpt">Getting my Security+ fundamentally changed how I think about the role of the support desk in an organization's security posture.</div><div class="post-card-meta"><span>Oct 2025</span><span class="post-card-arrow">→</span></div></div></div></div>
+    </div>
+  </div>
+  <footer><span>Kevin Toyer</span><a href="https://www.linkedin.com/in/kevintoyer/" target="_blank" style="color:var(--text-muted)">linkedin.com/in/kevintoyer</a></footer>
+</div>
+
+<!-- POST -->
+<div id="page-post" class="page">
+  <div class="post-page-wrap">
+    <div class="back-link" onclick="showPage('blog')">← Ideas & Insights</div>
+    <div class="post-header">
+      <div class="post-header-tag" id="post-tag"></div>
+      <h1 id="post-title"></h1>
+      <div class="post-header-meta" id="post-meta"></div>
+    </div>
+    <div class="post-body" id="post-body"></div>
+    <div style="margin-top:4rem;padding-top:2rem;border-top:1px solid var(--divider)">
+      <span class="btn-primary" onclick="showPage('blog')">← Back to Ideas & Insights</span>
+    </div>
+  </div>
+  <footer><span>Kevin Toyer</span><a href="https://www.linkedin.com/in/kevintoyer/" target="_blank" style="color:var(--text-muted)">linkedin.com/in/kevintoyer</a></footer>
+</div>
+
+<script>
+  const posts = {
+    post1:{tag:'Leadership',date:'February 2026',title:'Why Accountability Is the Foundation of Every Great Support Team',body:`<p>After more than a decade leading IT support teams, one principle has proven itself over and over: <strong>accountability is the single greatest predictor of team performance</strong>.</p><h2>Ownership vs. Compliance</h2><p>There's a meaningful difference between a team member who resolves a ticket because they have to, and one who resolves it because they take pride in doing it well.</p><blockquote>If your team doesn't know what a great resolution looks like, they'll aim for the minimum viable answer. Define excellence out loud, repeatedly.</blockquote><h2>When Things Go Wrong</h2><p>Accountability-first cultures treat mistakes as data. The first question isn't "who's fault is this?" — it's "what in our process allowed this to happen?"</p>`},
+    post2:{tag:'Operations',date:'January 2026',title:'KPIs That Actually Matter in IT Service Desk Management',body:`<p>Every service desk manager has a dashboard. The real question is: does your dashboard tell you anything useful?</p><h2>Vanity Metrics vs. Signal Metrics</h2><p>Ticket volume is a vanity metric. First Contact Resolution (FCR) is a signal metric. The KPIs I focus on: FCR rate, time to resolution, SLA compliance by tier, and CSAT.</p><blockquote>A number without context is just noise. Always ask what behavior a metric is incentivizing.</blockquote>`},
+    post3:{tag:'Culture',date:'December 2025',title:'Building Pride in a Support Role: How to Make Your Team Love the Work',body:`<p>Support roles carry an unfair reputation. The language we use around support work often diminishes it — and that shapes how support teams see themselves.</p><h2>Reframe the Mission</h2><p>The service desk is the face of IT to every employee in the organization. Every interaction is an opportunity to build trust or erode it.</p><blockquote>When people understand the impact of their work, they start caring about its quality in a way no KPI can manufacture.</blockquote>`},
+    post4:{tag:'Process',date:'November 2025',title:'SLA Management Without the Stress: A Practical Framework',body:`<p>SLAs exist to create accountability between IT and the business. But in many organizations, they become a source of constant stress.</p><h2>Build Buffer into Your Process</h2><p>Your SLA targets should be your floor, not your goal. If your P2 SLA is 4 hours, your team's internal target should be 3.</p><blockquote>You can't manage SLAs from the back of the queue. Catch potential misses at intake, not at hour three.</blockquote>`},
+    post5:{tag:'Security',date:'October 2025',title:'What CompTIA Security+ Taught Me About Running a Better Help Desk',body:`<p>I earned my CompTIA Security+ in April 2021. What I didn't expect was how much it would change how I think about the service desk itself.</p><h2>The Help Desk as an Attack Surface</h2><p>Attackers follow the path of least resistance. For many organizations, the help desk is that path.</p><blockquote>The front line of IT support is also the front line of IT security. Most teams aren't treating it that way.</blockquote>`}
+  };
+
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelectorAll('.nav-center a').forEach(a => a.classList.remove('active-link'));
+    document.querySelectorAll('.mobile-menu a').forEach(a => a.classList.remove('active-link'));
+    const map = { home:'nav-home', experience:'nav-experience', blog:'nav-blog', post:'nav-blog' };
+    const mobMap = { home:'mob-home', experience:'mob-experience', blog:'mob-blog', post:'mob-blog' };
+    if (map[name]) document.getElementById(map[name]).classList.add('active-link');
+    if (mobMap[name]) document.getElementById(mobMap[name]).classList.add('active-link');
+  }
+  function showPost(id) {
+    const p = posts[id];
+    document.getElementById('post-tag').textContent = p.tag;
+    document.getElementById('post-title').textContent = p.title;
+    document.getElementById('post-meta').textContent = `Kevin Toyer · ${p.date}`;
+    document.getElementById('post-body').innerHTML = p.body;
+    showPage('post');
+  }
+  function goTo(id) { setTimeout(() => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior:'smooth' }); }, 60); }
+
+  function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('hamburger');
+    const isOpen = menu.classList.contains('open');
+    menu.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+  }
+  function closeMenu() {
+    document.getElementById('mobile-menu').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+  }
+
+  function syncToggle() {
+    const t = document.documentElement.getAttribute('data-theme');
+    document.getElementById('theme-icon').textContent = t === 'dark' ? '🌙' : '☀️';
+    document.getElementById('theme-label').textContent = t === 'dark' ? 'Dark' : 'Light';
+  }
+  syncToggle();
+  function toggleTheme() {
+    const h = document.documentElement;
+    const next = h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    h.setAttribute('data-theme', next);
+    // Force Safari on iOS to repaint CSS variables
+    const bg = next === 'light' ? '#C8CACD' : '#2e2e2c';
+    document.body.style.backgroundColor = bg;
+    document.querySelector('nav').style.backgroundColor = bg;
+    setTimeout(() => {
+      document.body.style.backgroundColor = '';
+      document.querySelector('nav').style.backgroundColor = '';
+    }, 50);
+    syncToggle();
+  }
+  function handleSubmit(btn) { btn.textContent = 'Sent ✓'; btn.style.opacity = '0.6'; btn.style.cursor = 'default'; }
+  document.getElementById('nav-home').classList.add('active-link');
+  document.getElementById('mob-home').classList.add('active-link');
+</script>
+</body>
+</html>
